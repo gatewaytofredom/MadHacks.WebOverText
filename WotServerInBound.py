@@ -128,18 +128,19 @@ def sms_ahoy_reply():
 
         a = send_request(''.join(web_request),host_name,port)
 
-        # resp = MessagingResponse()
-        # Add a message
-        # resp.message(a)
+        resp = MessagingResponse()
+        #Add a message
+        resp.message(a)
 
         looptimes = math.ceil(len(a) / 120)
 
         for x in range(0,looptimes):
 
             if len(a) > 0:
-                # sendyboi(str(resp)[0:120],client_number)
+                sendyboi(a[0+(120*x):120*(x+1)],client_number)
                 print(str(x)+': '+a[0:120]+'\n')
-                a = a[120:] 
+                #a = a[120:] 
+                # resp.message(a)
         
         return ('')
 
