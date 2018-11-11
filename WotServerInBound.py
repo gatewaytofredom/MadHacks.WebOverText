@@ -1,6 +1,4 @@
 from twilio.twiml.messaging_response import MessagingResponse
-import requests
-import binascii
 from flask import Flask, request
 import socket
 import re
@@ -114,7 +112,6 @@ def sms_ahoy_reply():
     web_request = []
     #extract requested
     client_data = request.values.get('Body', None)
-    client_number = request.values.get('From',None)
     print("everything: " + str(request.values))
     print(client_data)
 
@@ -153,5 +150,5 @@ def sms_ahoy_reply():
     return ''
 
 if __name__ == "__main__":
-    app.run(debug=True,host='0.0.0.0')
+    app.run(host='0.0.0.0')
     print('flask server worky maybe')
