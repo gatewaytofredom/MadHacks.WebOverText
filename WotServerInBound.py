@@ -1,7 +1,5 @@
-import WotServerOutBound
 from twilio.twiml.messaging_response import MessagingResponse
 import requests
-import binascii
 from flask import Flask, request
 import socket
 import re
@@ -38,19 +36,21 @@ web_request = []
 def send_request(request,target_url,port):
     result_list = []
 
-    if port != 443:
-        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        s.connect((target_url, int(port)))
-        print('request: ' + request +'\r\n\r\n')
-        s.send(bytes(request +'\r\n\r\n', 'utf8'))
-    else:
-        context = ssl.SSLContext(ssl.PROTOCOL_TLSv1)
-        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        s_sock = context.wrap_socket(s, server_hostname=target_url)
-        s_sock.connect((target_url, 443))
-        s = ssl.wrap_socket(s, keyfile=None, certfile=None, server_side=False, cert_reqs=ssl.CERT_NONE, ssl_version=ssl.PROTOCOL_SSLv23)
-        s.send(bytes(request +'\r\n\r\n', 'utf8'))
-    
+    try:
+        if port != 443:
+            s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            s.connect((target_url, int(port)))
+            print('request: ' + request +'\r\n\r\n')
+            s.send(bytes(request +'\r\n\r\n', 'utf8'))
+        else:
+            context = ssl.SSLContext(ssl.PROTOCOL_TLSv1)
+            s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            s_sock = context.wrap_socket(s, server_hostname=target_url)
+            s_sock.connect((target_url, 443))
+            s = ssl.wrap_socket(s, keyfile=None, certfile=None, server_side=False, cert_reqs=ssl.CERT_NONE, ssl_version=ssl.PROTOCOL_SSLv23)
+            s.send(bytes(request +'\r\n\r\n', 'utf8'))
+    except Exception as e:
+            print(e)
        
 
     print("BEGIN DATA DUMP")
@@ -80,9 +80,6 @@ def parse_client_hostname(client_data):
     rg = re.compile(re1+re2+re3+re4,re.IGNORECASE|re.DOTALL)
     m = rg.search(str(client_data))
     if m:
-        word1=m.group(1)
-        c1=m.group(2)
-        ws1=m.group(3)
         fqdn1=m.group(4)
     print(str(fqdn1))
     return str(fqdn1)
@@ -97,7 +94,6 @@ def parse_client_port(client_data):
     rg = re.compile(re1+re2+re3,re.IGNORECASE|re.DOTALL)
     m = rg.search(str(client_data))
     if m:
-        word1=m.group(1)
         int1=m.group(2)
         print(int1)
         return int1
@@ -124,7 +120,6 @@ def sms_ahoy_reply():
     web_request = []
     #extract requested
     client_data = request.values.get('Body', None)
-    client_number = request.values.get('From',None)
     print("everything: " + str(request.values))
     print(client_data)
 
@@ -170,9 +165,3 @@ def sms_ahoy_reply():
 if __name__ == "__main__":
     app.run(debug=True,host='0.0.0.0')
     print('flask server worky maybe')
-
-
-
-
-
-
