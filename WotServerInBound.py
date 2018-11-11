@@ -1,4 +1,3 @@
-import WotServerOutBound
 from twilio.twiml.messaging_response import MessagingResponse
 import requests
 import binascii
@@ -8,8 +7,6 @@ import re
 from twilio.rest import Client
 import math
 import ssl
-
-
 
 # Your Account Sid and Auth Token from twilio.com/console
 account_sid = 'AC19db4c54f66c8c11a7bd3d43ec220064'
@@ -24,34 +21,32 @@ def sendyboi(message,outbound_number):
          to=outbound_number
      )
 
-
 web_request = []
-
-#gets webpage's source based on requested url
-#returns source hex.
-# def get_webpage(requested_url):
-#     url = requested_url
-#     headers = {'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 (KHTML, lik
-#return hostname from clientdata
-
 
 def send_request(request,target_url,port):
     result_list = []
+    try:
+        if port != 443:
+            s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            s.settimeout(5)
+            s.connect((target_url, int(port)))
+            # print('request: ' + request +'\r\n\r\n')
+            s.send(bytes(request +'\r\n\r\n', 'utf8'))
+        else:
+            sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            HOST = socket.getaddrinfo(target_url, port)[0][4][0]
+            
+            sock.connect((HOST, port))
 
-    if port != 443:
-        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        s.connect((target_url, int(port)))
-        print('request: ' + request +'\r\n\r\n')
-        s.send(bytes(request +'\r\n\r\n', 'utf8'))
-    else:
-        context = ssl.SSLContext(ssl.PROTOCOL_TLSv1)
-        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        s_sock = context.wrap_socket(s, server_hostname=target_url)
-        s_sock.connect((target_url, 443))
-        s = ssl.wrap_socket(s, keyfile=None, certfile=None, server_side=False, cert_reqs=ssl.CERT_NONE, ssl_version=ssl.PROTOCOL_SSLv23)
-        s.send(bytes(request +'\r\n\r\n', 'utf8'))
-    
-       
+            sock = ssl.wrap_socket(sock,cert_reqs=ssl.CERT_REQUIRED, ca_certs="cacerts.txt")
+            cert = sock.getpeercert()
+            for field in cert['subject']:
+                if field[0][0] == 'commonName':
+                    certhost = field[0][1]
+                    if certhost != HOST:
+                        raise ssl.SSLError("Host name '%s' doesn't match certificate host '%s'" % (HOST, certhost))
+        print(e)
+        return "<html><head><title>404</title></head><p>404 page not found</p></html>"
 
     print("BEGIN DATA DUMP")
 
@@ -80,9 +75,6 @@ def parse_client_hostname(client_data):
     rg = re.compile(re1+re2+re3+re4,re.IGNORECASE|re.DOTALL)
     m = rg.search(str(client_data))
     if m:
-        word1=m.group(1)
-        c1=m.group(2)
-        ws1=m.group(3)
         fqdn1=m.group(4)
     print(str(fqdn1))
     return str(fqdn1)
@@ -97,7 +89,6 @@ def parse_client_port(client_data):
     rg = re.compile(re1+re2+re3,re.IGNORECASE|re.DOTALL)
     m = rg.search(str(client_data))
     if m:
-        word1=m.group(1)
         int1=m.group(2)
         print(int1)
         return int1
@@ -110,7 +101,6 @@ def parse_client_request(client_data):
     request_start = str(client_data).find(sub,0)
     request_end = str(client_data).find(sub2,0) + 3
     return str(client_data)[request_start:request_end]
-
 
 # sends users web request and returns the websites response
 #returns webrequest as a single string
@@ -145,12 +135,7 @@ def sms_ahoy_reply():
         print(web_request)
         a = send_request(''.join(web_request),host_name,port)
 
-        # resp = MessagingResponse()
-        # Add a message
-        # resp.message(a)
-
         looptimes = math.ceil(len(a) / 120)
-        print('start da loopin')
 
         for x in range(0,looptimes):
 
@@ -170,9 +155,3 @@ def sms_ahoy_reply():
 if __name__ == "__main__":
     app.run(debug=True,host='0.0.0.0')
     print('flask server worky maybe')
-
-
-
-
-
-
