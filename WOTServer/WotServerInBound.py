@@ -2,12 +2,13 @@
 from twilio.twiml.messaging_response import MessagingResponse
 import requests
 from flask import Flask, request
-import socket
 import re
 from twilio.rest import Client
 import math
 import ssl
 import httpser
+import WebRequest
+
 
 
 
@@ -35,37 +36,7 @@ web_request = []
 #return hostname from clientdata
 
 #
-def send_request(requestr,target_url,port):
-    print(port)
-    result_list = []
 
-    try:
-
-        if int(port) != 443:
-            s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            s.connect((target_url, int(port)))
-            s.send(bytes(requestr +'\r\n\r\n', 'utf8'))
-        else: 
-            httpsoutput = httpser.requester(requestr,target_url)
-            print(httpsoutput)
-            return httpsoutput
-
-    except Exception as e:
-        print(e)
-    
-    print("BEGIN DATA DUMP")
-
-    result = s.recv(1024)
-
-    #revieve data and store in list
-    while (len(result) > 0):
-        result_list.append(result.decode())
-        result = s.recv(1024)
-    s.close()
-
-    #return recieved data as single string
-    print("http:"+str(type(''.join(result_list))))
-    return ''.join(result_list)
 
 def parse_client_hostname(client_data):
     re1='(Host)'	# Word 1
@@ -120,25 +91,31 @@ def sms_ahoy_reply():
         end = client_data.find('[end]') 
         web_request.append(client_data[0:end])
 
+        # Get Hostname
         host_name = parse_client_hostname(web_request)
 
+        # Get Port
         port = parse_client_port(web_request)
 
+        # Get Header Data
         header = parse_client_request(web_request)
 
-        a = send_request(''.join(web_request),host_name,port)
+        #create web request
+        wotRequest = WebRequest
+
+        response = WebRequest.send_request(''.join(web_request),host_name,port)
 
         resp = MessagingResponse()
         #Add a message
-        resp.message(a)
+        resp.message(response)
 
-        looptimes = math.ceil(len(a) / 120)
+        looptimes = math.ceil(len(WebRequest) / 120)
 
         for x in range(0,looptimes):
 
-            if len(a) > 0:
-                sendyboi(a[0+(120*x):120*(x+1)],client_number)
-                print(str(x)+': '+a[0:120]+'\n')
+            if len(response) > 0:
+                sendyboi(response[0+(120*x):120*(x+1)],client_number)
+                print(str(x)+': '+response[0:120]+'\n')
                 #a = a[120:] 
                 # resp.message(a)
         
