@@ -8,13 +8,20 @@ import math
 import ssl
 import httpser
 import WebRequest
+import yaml
 
 
-
+# load Twilio account info from configuration file
+with open("config.yaml", 'r') as stream:
+    try:
+        configuration = yaml.load(stream)
+    except yaml.YAMLError as exc:
+        print(exc)
 
 # Your Account Sid and Auth Token from twilio.com/console
-account_sid = 'AC19db4c54f66c8c11a7bd3d43ec220064'
-auth_token = 'd84514af3b6cf09e40c659950ca4b99a'
+account_sid = configuration['account_sid']
+auth_token = configuration['auth_token']
+
 client = Client(account_sid, auth_token)
 
 def sendyboi(message,outbound_number):
