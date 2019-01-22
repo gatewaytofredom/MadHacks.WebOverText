@@ -3,35 +3,11 @@ from twilio.twiml.messaging_response import MessagingResponse
 import requests
 from flask import Flask, request
 import re
-from twilio.rest import Client
 import math
 import ssl
 import httpser
 import WebRequest
-import yaml
-
-
-# load Twilio account info from configuration file
-with open("config.yaml", 'r') as stream:
-    try:
-        configuration = yaml.load(stream)
-    except yaml.YAMLError as exc:
-        print(exc)
-
-# Your Account Sid and Auth Token from twilio.com/console
-account_sid = configuration['account_sid']
-auth_token = configuration['auth_token']
-
-client = Client(account_sid, auth_token)
-
-def sendyboi(message,outbound_number):
-    message = client.messages \
-    .create(
-         body=str(message),
-         from_='+17155046198',
-         to=outbound_number
-     )
-
+import WotServerOutBound
 
 web_request = []
 
@@ -41,8 +17,6 @@ web_request = []
 #     url = requested_url
 #     headers = {'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 (KHTML, lik
 #return hostname from clientdata
-
-#
 
 
 def parse_client_hostname(client_data):
@@ -86,17 +60,25 @@ def construct_request():
 
 app = Flask(__name__)
 
+
+
+# Called when the sms webdirectory is accessed from twillio
+
 @app.route("/sms", methods=['GET', 'POST'])
 def sms_ahoy_reply():
+
+    #Create an object for handeling server to client messaging
+    SmsHandler = WotServerOutBound.smsSender()
+
     web_request = []
-    #extract requested
-    client_data = request.values.get('Body', None)
-    client_number = request.values.get('From',None)
+    #extract clients request and phone number
+    clientData = request.values.get('Body', None)
+    clientNumber = request.values.get('From',None)
 
     #"parses" each request
-    if "[end]" in client_data:
-        end = client_data.find('[end]') 
-        web_request.append(client_data[0:end])
+    if "[end]" in clientData:
+        end = clientData.find('[end]') 
+        web_request.append(clientData[0:end])
 
         # Get Hostname
         host_name = parse_client_hostname(web_request)
@@ -121,7 +103,7 @@ def sms_ahoy_reply():
         for x in range(0,looptimes):
 
             if len(response) > 0:
-                sendyboi(response[0+(120*x):120*(x+1)],client_number)
+                SmsHandler.send(response[0+(120*x):120*(x+1)],clientNumber)
                 print(str(x)+': '+response[0:120]+'\n')
                 #a = a[120:] 
                 # resp.message(a)
@@ -129,7 +111,7 @@ def sms_ahoy_reply():
         return ('')
 
     else:
-        web_request.append(client_data)
+        web_request.append(clientData)
 
     return ''
 
