@@ -23,6 +23,6 @@ def requester(request,hostname):
     s.close()
     return ''.join(ab)
 
-
-requester('asd','github.com')
+# Function used for testing recieved data without using twiliio
+#requester('asd','github.com')
 

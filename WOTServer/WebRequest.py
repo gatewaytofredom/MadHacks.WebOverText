@@ -8,7 +8,6 @@ def send_request(requestr,target_url,port):
     result_list = []
 
     try:
-
         #If the port is not ssl secured 
         if int(port) != 443:
             s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
