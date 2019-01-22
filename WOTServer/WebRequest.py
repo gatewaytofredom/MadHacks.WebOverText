@@ -9,10 +9,12 @@ def send_request(requestr,target_url,port):
 
     try:
 
+        #If the port is not ssl secured 
         if int(port) != 443:
             s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             s.connect((target_url, int(port)))
             s.send(bytes(requestr +'\r\n\r\n', 'utf8'))
+        #if the port is not ssl secured
         else: 
             httpsoutput = httpser.requester(requestr,target_url)
             print(httpsoutput)
