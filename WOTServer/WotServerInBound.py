@@ -10,15 +10,6 @@ import WebRequest
 import WotServerOutBound
 import smsParse
 
-web_request = []
-
-#gets webpage's source based on requested url
-#returns source hex.
-# def get_webpage(requested_url):
-#     url = requested_url
-#     headers = {'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 (KHTML, lik
-#return hostname from clientdata
-
 app = Flask(__name__)
 
 # Called when the sms webdirectory is accessed from twillio
@@ -34,11 +25,6 @@ def sms_ahoy_reply():
     #extract clients request and phone number
     clientData = request.values.get('Body', None)
     clientNumber = request.values.get('From',None)
-
-    # sends users web request and returns the websites response
-    #returns webrequest as a single string
-    def constructRequest(self):
-        return ''.join(web_request)
 
     #"parses" each request
     if "[end]" in clientData:
@@ -64,6 +50,7 @@ def sms_ahoy_reply():
         #Add a message
         resp.message(response)
 
+        #determine number of text messages required to send all data
         looptimes = math.ceil(len(WebRequest) / 120)
 
         for x in range(0,looptimes):
@@ -71,10 +58,7 @@ def sms_ahoy_reply():
             if len(response) > 0:
                 SmsHandler.send(response[0+(120*x):120*(x+1)],clientNumber)
                 print(str(x)+': '+response[0:120]+'\n')
-                #a = a[120:] 
-                # resp.message(a)
-        
-        return ('')
+        return ''
 
     else:
         web_request.append(clientData)
