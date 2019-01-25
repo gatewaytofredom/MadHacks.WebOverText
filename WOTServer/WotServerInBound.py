@@ -15,7 +15,7 @@ app = Flask(__name__)
 # Called when the sms webdirectory is accessed from twillio
 
 @app.route("/sms", methods=['GET', 'POST'])
-def sms_ahoy_reply():
+def incomingSMSRequest():
 
     #Create an object for handeling server to client messaging
     SmsHandler = WotServerOutBound.smsSender()
@@ -51,13 +51,16 @@ def sms_ahoy_reply():
         resp.message(response)
 
         #determine number of text messages required to send all data
-        looptimes = math.ceil(len(WebRequest) / 120)
 
-        for x in range(0,looptimes):
+        textMessageLength = 150
+
+        requiredTexts = math.ceil(len(WebRequest) / textMessageLength)
+
+        for x in range(0,requiredTexts):
 
             if len(response) > 0:
-                SmsHandler.send(response[0+(120*x):120*(x+1)],clientNumber)
-                print(str(x)+': '+response[0:120]+'\n')
+                SmsHandler.send(response[0+(textMessageLength*x):textMessageLength*(x+1)],clientNumber)
+                print(str(x)+': '+response[0:textMessageLength]+'\n')
         return ''
 
     else:
