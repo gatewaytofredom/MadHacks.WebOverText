@@ -3,35 +3,35 @@ import socket
 import requests
 import httpser
 
-def send_request(requestr,target_url,port):
+def send_request(requester,target_url,port):
     print(port)
-    result_list = []
+    data = []
 
     try:
-        #If the port is not ssl secured 
+        # HTTPS Request 
         if int(port) != 443:
             s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             s.connect((target_url, int(port)))
-            s.send(bytes(requestr +'\r\n\r\n', 'utf8'))
-        #if the port is not ssl secured
+            s.send(bytes(requester +'\r\n\r\n', 'utf8'))
+        # HTTP Request
         else: 
-            httpsoutput = httpser.requester(requestr,target_url)
-            print(httpsoutput)
-            return httpsoutput
+            httpsOutput = httpser.requester(requester,target_url)
+            print(httpsOutput)
+            return httpsOutput
 
     except Exception as e:
         print(e)
     
     print("BEGIN DATA DUMP")
 
-    result = s.recv(1024)
+    incomingData = s.recv(1024)
 
-    #revieve data and store in list
-    while (len(result) > 0):
-        result_list.append(result.decode())
-        result = s.recv(1024)
+    # Revieve data on socket
+    while (len(incomingData) > 0):
+        data.append(incomingData.decode())
+        incomingData = s.recv(1024)
     s.close()
 
-    #return recieved data as single string
-    print("http:"+str(type(''.join(result_list))))
-    return ''.join(result_list)
+    # Return concatinated data
+    print("http:"+str(type(''.join(data))))
+    return ''.join(data)
